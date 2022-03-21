@@ -13,8 +13,7 @@ token0      = ""
 token1      = "" 
 token2      = ""
 token3      = "" 
-
-reactions = ["1️⃣", "2️⃣", "3️⃣"]
+reactions = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
 
 bot  = discum.Client(token=token0, log={"console":False, "file":False})
 bot1 = discum.Client(token=token1, log={"console":False, "file":False})
@@ -88,17 +87,30 @@ def add_reaction(channel, ID, reaction, e):
             print(3)
         print("Reaction Added")
 
-
-def chop(url):
+def chop(url, CardCount):
+  test_string4 = ""
   response = requests.get(url)
   im = Image.open(BytesIO(response.content))
-  im1 = im.crop((336-280,61,498-270,102))
-  im2 = im.crop((336,61,498,102))
-  im3 = im.crop((336+270,61,498+277,102))
+  if   CardCount == 3:
+    im1 = im.crop((336-280,61,498-270,102))
+    im2 = im.crop((336,61,498,102))
+    im3 = im.crop((336+270,61,498+277,102))
+
+  elif CardCount == 4:
+    im1 = im.crop((59+(274*0),62,227+(274*0),103))
+    im2 = im.crop((59+(274*1),62,227+(274*1),103))
+    im3 = im.crop((59+(274*2),62,227+(274*2),103))
+    im4 = im.crop((59+(274*3),62,227+(274*3),103))
+
   try:
     test_string1 = str((re.sub(r'[^A-Za-z0-9 ]+', '', image_to_string(im1))))
     test_string2 = str((re.sub(r'[^A-Za-z0-9 ]+', '', image_to_string(im2))))
     test_string3 = str((re.sub(r'[^A-Za-z0-9 ]+', '', image_to_string(im3))))
+    if CardCount == 3:
+        print(f"{test_string1}\n{test_string2}\n{test_string3}")
+    if CardCount == 4:
+        test_string4 = str((re.sub(r'[^A-Za-z0-9 ]+', '', image_to_string(im4))))
+        print(f"{test_string1}\n{test_string2}\n{test_string3}\n{test_string4}")
 
 
   except:
@@ -117,6 +129,10 @@ def chop(url):
     print(3)
     return 3
 
+  elif bool([ele for ele in test_list if (ele in test_string4)]) == True:
+    print(4)
+    return 4
+
   else:
     return 0
 
@@ -130,9 +146,13 @@ def helloworld(resp):
         channel_id = str(resp['d']['channel_id'])
         guild = str(resp['d']['guild_id'])
         ID =  str(resp['d']['id'])
-        if "dropping 3" in msg_content:
+        if "dropping 3 cards since" in msg_content or "dropping 4 cards since" in msg_content:
+            if "3" in msg_content:
+                CardCount = 3
+            elif "4" in msg_content:
+                CardCount = 4
             url = resp['d']['attachments'][0]['url']
-            ocr_val = chop(url)
+            ocr_val = chop(url, CardCount)
             if ocr_val == 0:
                 print(f"No interesting card found in {channel_id}")
             else:            
